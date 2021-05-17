@@ -1,9 +1,13 @@
 
 from django.contrib import admin
 from django.urls import path, include
+from django.conf.urls import url
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from . import settings
+from django.contrib.staticfiles.urls import static
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 
 schema_view = get_schema_view(
@@ -20,12 +24,45 @@ schema_view = get_schema_view(
 )
 
 
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('apps.authentication.urls')),
 
-    path('', schema_view.with_ui('swagger',
-                                 cache_timeout=0), name='schema-swagger-ui'),
-    path("redoc", schema_view.with_ui('redoc',
-                                      cache_timeout=0), name='schema-redoc'),
+    # url('categorieslist', CategoryView.as_view()),
+
+    url(r'^api/', include([
+
+        url(r'^docs/', include([
+
+            path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+            path("redoc", schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+
+        ])),
+        url(r'^auth/', include([
+
+            path('', include('apps.authentication.urls')),
+
+        ])),
+        
+
+        url(r'^products/', include([
+
+            url('', include('apps.products.urls')),
+
+        ])),
+
+
+
+        
+    ])),
+
+    
+  
+    
 ]
+
+
+
+urlpatterns += staticfiles_urlpatterns()
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

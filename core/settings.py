@@ -2,7 +2,7 @@
 from pathlib import Path
 from dotenv import load_dotenv
 import os
-
+from datetime import timedelta
 
 load_dotenv()
 
@@ -35,12 +35,14 @@ INSTALLED_APPS = [
 LOCAL_APPS = [
     'apps.users',
     'apps.authentication',
+    'apps.products',
 ]
 
 # additional plugin apps
 THIRD_PARTY_APPS = [
     'rest_framework',
-    'drf_yasg'
+    'drf_yasg',
+    'rest_framework_custom_exceptions'
 ]
 
 # join three  Application definition
@@ -59,7 +61,7 @@ MIDDLEWARE = [
 
 # local middleware
 LOCAL_MIDDLEWARE = [
-
+    'core.exceptions.ExceptionMiddleware',
 ]
 
 # join middleware definition
@@ -169,12 +171,51 @@ SWAGGER_SETTINGS = {
 
 
 REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'core.exceptions.handle_exception',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    
 }
 
 
+SIMPLE_JWT = {
+    # 'ACCESS_TOKEN_LIFETIME': timedelta(minutes=2),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': False,
+
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': os.environ.get('JWT_SECRET_KEY'),
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+
+    'JTI_CLAIM': 'jti',
+
+    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+    # 'SLIDING_TOKEN_LIFETIME': timedelta(minutes=2),
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=30),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+}
+
+
+
+BASE_URL = os.environ.get('BASE_URL','http://192.168.1.4:8000')
+
+MEDIA_ROOT = os.path.join(BASE_DIR, "core/media")
+MEDIA_URL = os.environ.get("MEDIA_URL", "/core/media/")
 
 
 
